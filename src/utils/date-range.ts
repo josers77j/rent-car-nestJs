@@ -35,17 +35,3 @@ export function dateRange(
 
   return {};
 }
-
-export function dateRangeQueryRaw({ startDate, endDate, dateColumnName }) {
-  const keyDate =
-    startDate && endDate ? '01' : startDate ? '10' : endDate ? '11' : '00';
-
-  const dateFilterOptions = {
-    '00': ``,
-    '01': `AND (${dateColumnName} BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59')`,
-    '10': `AND ${dateColumnName} >= '${startDate} 00:00:00'`,
-    '11': `AND ${dateColumnName} <= '${endDate} 23:59:59'`,
-  };
-
-  return dateFilterOptions[keyDate];
-}

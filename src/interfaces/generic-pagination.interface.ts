@@ -29,6 +29,6 @@ export interface builderSettings<T, K> {
       skip?: number;
     }) => Promise<T[]>;
   };
-  args: { where: K }; // Asegúrate de que `args` tenga una propiedad `where`
+  args: { where: K };
   options: PaginateOptions;
 }

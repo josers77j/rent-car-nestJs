@@ -1,3 +1,4 @@
+
 services:
   postgres:
     image: postgres:15
@@ -8,22 +9,8 @@ services:
       POSTGRES_PASSWORD: password123
     ports:
       - '5432:5432'
-
-  backend-service:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    depends_on:
-      - postgres
-    environment:
-      DATABASE_URL: ${DATABASE_URL}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_NAME: ${DB_NAME}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - '5003:5003'
     volumes:
-      - .:/usr/src/app
-    command: ['./wait-for-postgres.sh', 'pnpm', 'run', 'dev']
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
