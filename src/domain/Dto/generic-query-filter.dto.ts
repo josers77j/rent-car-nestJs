@@ -1,6 +1,14 @@
-import { IsISO8601, IsNumber, IsObject, IsOptional } from 'class-validator';
+import { IsISO8601, IsNumber, IsOptional } from 'class-validator';
 
-export class GenericQueryFilterDto<T> {
+export class FiltersDto {
+  @IsOptional()
+  name?: string;
+
+  @IsOptional()
+  email?: string;
+}
+
+export class GenericQueryFilterDto {
   @IsOptional()
   @IsISO8601()
   to: string;
@@ -8,10 +16,6 @@ export class GenericQueryFilterDto<T> {
   @IsOptional()
   @IsISO8601()
   from: string;
-
-  @IsOptional()
-  @IsObject()
-  filters: T[];
 
   @IsOptional()
   @IsNumber()

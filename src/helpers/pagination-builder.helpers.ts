@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   builderSettings,
   PaginatedResult,
@@ -18,6 +19,8 @@ export async function builderPagination<T, K>({
       ...args,
       take: perPage,
       skip,
+      include: args['include'], // Incluye relaciones
+      select: args['select'], // Selecciona campos específicos
     }),
   ]);
 

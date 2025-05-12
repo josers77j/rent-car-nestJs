@@ -27,8 +27,10 @@ export interface builderSettings<T, K> {
       where: K;
       take?: number;
       skip?: number;
+      include?: any; // Para incluir relaciones
+      select?: any; // Para seleccionar campos específicos
     }) => Promise<T[]>;
   };
-  args: { where: K };
+  args: { where: K; include?: any; select?: any }; // Agrega `include` y `select`
   options: PaginateOptions;
 }

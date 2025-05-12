@@ -24,3 +24,10 @@ export interface UserPayload {
   iat: number;
   exp: number;
 }
+// filepath: /Users/josetrejo/develop/rent-project/rent-car-backend/src/interfaces/jwt-payload.interface.ts
+export interface JwtPayload {
+  id: number;
+  email: string;
+  role: string;
+  name: string;
+}

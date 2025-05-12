@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   Injectable,
   InternalServerErrorException,
@@ -7,7 +9,11 @@ import {
 } from '@nestjs/common';
 import { UserRepository } from '../repository/user.repository';
 
-import { CreateUserDto, passwordUserDto } from '../dto/create-user.dto';
+import {
+  CreateUserDto,
+  passwordUserDto,
+  UpdateBasicInformationDto,
+} from '../dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { GenericQueryFilterDto } from 'src/domain/Dto/generic-query-filter.dto';
 
@@ -48,7 +54,7 @@ export class UsersService {
           'Ocurrio un error al crear el usuario',
         );
 
-      return { message: 'usuario creado exitosamente' };
+      return createProcess;
     } catch (err) {
       Logger.error(err);
       if (err instanceof UnprocessableEntityException) throw err;
@@ -83,13 +89,72 @@ export class UsersService {
     }
   }
 
-  async findAll<T>(queryFilter: GenericQueryFilterDto<T>) {
+  async findAll(
+    queryFilter: GenericQueryFilterDto,
+    name: string,
+    userId: number,
+  ) {
     try {
-      return await this.userRepository.findAll(queryFilter);
+      //return await this.userRepository.findAll(queryFilter, name);
+      const { data, meta } = await this.userRepository.findAll(
+        queryFilter,
+        name,
+        userId,
+      );
+
+      const usersMapped = data.map((user) => {
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          roleId: user.roleId,
+          createdAt: user.createdAt,
+          role: user['role']?.name || null,
+        };
+      });
+
+      const payload = {
+        data: usersMapped,
+        meta: {
+          total: meta.total,
+          lastpage: meta.lastPage,
+          page: meta.currentPage,
+          prev: meta.prev,
+          next: meta.next,
+          perPage: queryFilter.perPage,
+        },
+      };
+      return payload;
     } catch (error) {
       Logger.error(error);
 
       throw new InternalServerErrorException('Error al obtener los usuarios');
+    }
+  }
+
+  async updateBasicInformation(
+    userId: number,
+    user: UpdateBasicInformationDto,
+  ) {
+    try {
+      const userUpdated = await this.userRepository.updateBasicInformation(
+        userId,
+        user,
+      );
+
+      if (!userUpdated)
+        throw new UnprocessableEntityException(
+          'Ocurrio un error al actualizar la información basica del usuario',
+        );
+
+      return userUpdated;
+    } catch (error) {
+      Logger.error(error);
+      if (error instanceof UnprocessableEntityException) throw error;
+
+      throw new InternalServerErrorException(
+        'Error al actualizar la información basica del usuario',
+      );
     }
   }
 }
