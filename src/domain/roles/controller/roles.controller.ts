@@ -11,7 +11,7 @@ import {
 import { RolesService } from '../service/roles.service';
 import { AuthGuard } from 'src/domain/auth/guards/auth.guard';
 
-@UseGuards(AuthGuard)
+//@UseGuards(AuthGuard)
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
