@@ -8,6 +8,7 @@ import { UsersModule } from './domain/users/users.module';
 import { RolesModule } from './domain/roles/roles.module';
 import { PrismaService } from 'prisma/prisma.service';
 import { ClientsModule } from './domain/clients/clients.module';
+import { VehiclesModule } from './domain/vehicles/vehicles.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ClientsModule } from './domain/clients/clients.module';
     UsersModule,
     RolesModule,
     ClientsModule,
+    VehiclesModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
