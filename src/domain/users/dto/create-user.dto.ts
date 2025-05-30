@@ -35,6 +35,7 @@ export class passwordUserDto extends PickType(CreateUserDto, ['password']) {
 export class UpdateBasicInformationDto extends PickType(CreateUserDto, [
   'roleId',
   'name',
+  'email',
 ] as const) {}
 
 export class updateEmailDto extends PickType(CreateUserDto, ['email']) {}

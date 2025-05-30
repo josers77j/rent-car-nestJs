@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
@@ -66,35 +60,81 @@ model Role {
   id          Int       @id @default(autoincrement())
   name        String
   description String?
+  createdBy   Int?
+  modifiedBy  Int?
+  deletedBy   Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now())
-  users       User[]
-  permissions RolePermission[]
+  deletedAt   DateTime?
+
+  users           User[]
+  permissions     RolePermission[]
+  createdByUser   User? @relation("RoleCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser  User? @relation("RoleModifiedBy", fields: [modifiedBy], references: [id])
+  deletedByUser   User? @relation("RoleDeletedBy", fields: [deletedBy], references: [id])
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String
-  email     String    @unique
-  password  String
-  roleId    Int?
-  role      Role?     @relation(fields: [roleId], references: [id], onDelete: SetNull)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now())
-  customers Customer[]
-  vehicles  Vehicle[]
-  rentals   Rental[]
-  payments  Payment[]
-  maintenance Maintenance[]
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String  @unique
+  password String
+  roleId   Int?
+
+  role Role? @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  createdBy   Int?
+  modifiedBy  Int?
+  deletedBy   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  deletedAt   DateTime?
+
+  // Relaciones con otros modelos
+  createdCustomers     Customer[]    @relation("CustomerCreatedBy")
+  modifiedCustomers    Customer[]    @relation("CustomerModifiedBy")
+  deletedCustomers     Customer[]    @relation("CustomerDeletedBy")
+
+  createdVehicles      Vehicle[]     @relation("VehicleCreatedBy")
+  modifiedVehicles     Vehicle[]     @relation("VehicleModifiedBy")
+  deletedVehicles      Vehicle[]     @relation("VehicleDeletedBy")
+
+  createdRentals       Rental[]      @relation("RentalCreatedBy")
+  modifiedRentals      Rental[]      @relation("RentalModifiedBy")
+  deletedRentals       Rental[]      @relation("RentalDeletedBy")
+
+  createdPayments      Payment[]     @relation("PaymentCreatedBy")
+  modifiedPayments     Payment[]     @relation("PaymentModifiedBy")
+  deletedPayments      Payment[]     @relation("PaymentDeletedBy")
+
+  createdMaintenance   Maintenance[] @relation("MaintenanceCreatedBy")
+  modifiedMaintenance  Maintenance[] @relation("MaintenanceModifiedBy")
+  deletedMaintenance   Maintenance[] @relation("MaintenanceDeletedBy")
+
+  createdRoles     Role[]            @relation("RoleCreatedBy")
+  modifiedRoles    Role[]            @relation("RoleModifiedBy")
+  deletedRoles     Role[]            @relation("RoleDeletedBy")
+
+  createdPermissions   Permission[]  @relation("PermissionCreatedBy")
+  modifiedPermissions  Permission[]  @relation("PermissionModifiedBy")
+  deletedPermissions   Permission[]  @relation("PermissionDeletedBy")
 }
 
 model Permission {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now())
-  roles       RolePermission[]
+  createdBy   Int?
+  modifiedBy  Int?
+  deletedBy   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  deletedAt   DateTime?
+
+  roles             RolePermission[]
+  createdByUser     User? @relation("PermissionCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser    User? @relation("PermissionModifiedBy", fields: [modifiedBy], references: [id])
+  deletedByUser     User? @relation("PermissionDeletedBy", fields: [deletedBy], references: [id])
 }
 
 model RolePermission {
@@ -107,79 +147,115 @@ model RolePermission {
 }
 
 model Customer {
-  id                Int               @id @default(autoincrement())
-  name              String
-  phone             String?
-  email             String?
-  address           String?
-  identification    String
+  id                 Int               @id @default(autoincrement())
+  name               String
+  phone              String?
+  email              String?
+  address            String?
+  identification     String
   identificationType IdentificationType
-  createdBy         Int?
-  createdByUser     User?             @relation(fields: [createdBy], references: [id], onDelete: SetNull)
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @default(now())
-  rentals           Rental[]
+  createdBy          Int?
+  modifiedBy         Int?
+  deletedBy          Int?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @default(now())
+  deletedAt          DateTime?
+
+  createdByUser      User?             @relation("CustomerCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser     User?             @relation("CustomerModifiedBy", fields: [modifiedBy], references: [id])
+  deletedByUser      User?             @relation("CustomerDeletedBy", fields: [deletedBy], references: [id])
+
+  rentals            Rental[]
 }
 
 model Vehicle {
-  id          Int          @id @default(autoincrement())
-  brand       String
-  model       String
-  year        Int
-  plateNumber String       @unique
-  type        VehicleType
-  status      VehicleStatus
-  dailyRate   Float
-  createdBy   Int?
-  createdByUser User?      @relation(fields: [createdBy], references: [id], onDelete: SetNull)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @default(now())
-  rentals     Rental[]
-  maintenance Maintenance[]
+  id             Int          @id @default(autoincrement())
+  brand          String
+  model          String
+  year           Int
+  plateNumber    String       @unique
+  type           VehicleType
+  status         VehicleStatus
+  dailyRate      Float
+  createdBy      Int?
+  modifiedBy     Int?
+  deletedBy      Int?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now())
+  deletedAt      DateTime?
+
+  createdByUser  User?        @relation("VehicleCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?        @relation("VehicleModifiedBy", fields: [modifiedBy], references: [id])
+  deletedByUser  User?        @relation("VehicleDeletedBy", fields: [deletedBy], references: [id])
+
+  rentals        Rental[]
+  maintenance    Maintenance[]
 }
 
 model Rental {
-  id            Int          @id @default(autoincrement())
-  customerId    Int
-  vehicleId     Int
-  startDate     DateTime
-  endDate       DateTime
-  totalPrice    Float
-  status        RentalStatus
-  paymentStatus PaymentStatus
-  createdBy     Int?
-  createdByUser User?        @relation(fields: [createdBy], references: [id], onDelete: SetNull)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @default(now())
-  customer      Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  vehicle       Vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  payments      Payment[]
+  id             Int          @id @default(autoincrement())
+  customerId     Int
+  vehicleId      Int
+  startDate      DateTime
+  endDate        DateTime
+  totalPrice     Float
+  status         RentalStatus
+  paymentStatus  PaymentStatus
+  createdBy      Int?
+  modifiedBy     Int?
+  deletedBy      Int?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now())
+  deletedAt      DateTime?
+
+  customer       Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  vehicle        Vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  createdByUser  User?        @relation("RentalCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?        @relation("RentalModifiedBy", fields: [modifiedBy], references: [id])
+  deletedByUser  User?        @relation("RentalDeletedBy", fields: [deletedBy], references: [id])
+
+  payments       Payment[]
 }
 
 model Maintenance {
-  id          Int            @id @default(autoincrement())
-  vehicleId   Int
-  description String?
-  type        MaintenanceType
-  startDate   DateTime
-  endDate     DateTime
-  cost        Float
-  createdBy   Int?
-  createdByUser User?        @relation(fields: [createdBy], references: [id], onDelete: SetNull)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @default(now())
-  vehicle     Vehicle        @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  id             Int            @id @default(autoincrement())
+  vehicleId      Int
+  description    String?
+  type           MaintenanceType
+  startDate      DateTime
+  endDate        DateTime
+  cost           Float
+  createdBy      Int?
+  modifiedBy     Int?
+  deletedBy      Int?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @default(now())
+  deletedAt      DateTime?
+
+  vehicle        Vehicle        @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  createdByUser  User?          @relation("MaintenanceCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?          @relation("MaintenanceModifiedBy", fields: [modifiedBy], references: [id])
+  deletedByUser  User?          @relation("MaintenanceDeletedBy", fields: [deletedBy], references: [id])
 }
 
 model Payment {
-  id           Int          @id @default(autoincrement())
-  rentalId     Int
-  amount       Float
-  paymentMethod PaymentMethod
-  paymentDate  DateTime
-  createdBy    Int?
-  createdByUser User?       @relation(fields: [createdBy], references: [id], onDelete: SetNull)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @default(now())
-  rental       Rental       @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  id             Int          @id @default(autoincrement())
+  rentalId       Int
+  amount         Float
+  paymentMethod  PaymentMethod
+  paymentDate    DateTime
+  createdBy      Int?
+  modifiedBy     Int?
+  deletedBy      Int?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now())
+  deletedAt      DateTime?
+
+  rental         Rental       @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+
+  createdByUser  User?        @relation("PaymentCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?        @relation("PaymentModifiedBy", fields: [modifiedBy], references: [id])
+  deletedByUser  User?        @relation("PaymentDeletedBy", fields: [deletedBy], references: [id])
 }

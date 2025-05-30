@@ -13,6 +13,8 @@ import {
 import { AuthService } from '../service/auth.service';
 import { LoginDto } from '../dto/login.dto';
 import { AuthGuard } from '../guards/auth.guard';
+import { GetUser } from 'src/decorators/user-token.decorators';
+import { JwtPayload } from 'src/interfaces/jwt-strategy.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -26,7 +28,8 @@ export class AuthController {
 
   @Get('profile')
   @UseGuards(AuthGuard)
-  profile(@Request() req) {
+  profile(@Request() req, @GetUser() user: JwtPayload) {
+    console.log('user', user);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return { user: req.user };
   }

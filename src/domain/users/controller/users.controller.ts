@@ -9,7 +9,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../service/users.service';
-import { CreateUserDto, passwordUserDto } from '../dto/create-user.dto';
+import {
+  CreateUserDto,
+  passwordUserDto,
+  UpdateBasicInformationDto,
+} from '../dto/create-user.dto';
 import { AuthGuard } from 'src/domain/auth/guards/auth.guard';
 import { GenericQueryFilterDto } from 'src/domain/Dto/generic-query-filter.dto';
 
@@ -27,12 +31,24 @@ export class UsersController {
   }
 
   @Get('all')
-  findAll<T>(@Query() queryFilter: GenericQueryFilterDto<T>) {
-    return this.usersService.findAll(queryFilter);
+  findAll(
+    @Query('name') name: string,
+    @Query('userId') userId: number,
+    @Query() queryFilter: GenericQueryFilterDto,
+  ) {
+    return this.usersService.findAll(queryFilter, name, +userId);
   }
 
   @Post()
   createUser(@Body() user: CreateUserDto) {
     return this.usersService.createUser(user);
+  }
+
+  @Patch(':id')
+  updateBasicInformation(
+    @Body() user: UpdateBasicInformationDto,
+    @Param('id') id: number,
+  ) {
+    return this.usersService.updateBasicInformation(id, user);
   }
 }

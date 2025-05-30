@@ -1,10 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
   const port = Number(process.env.PORT || 3001);
 
   app.enableCors();
@@ -13,10 +14,11 @@ async function bootstrap() {
 
   app.setGlobalPrefix(globalPrefix);
 
+  // Configuración de Swagger
   const config = new DocumentBuilder()
-    .setTitle('NestJS API')
+    .setTitle('API de Usuarios')
     .setDescription(
-      'Documentacion de la API de NestJS para el proyecto de renta de autos',
+      'Documentación de la API para la gestión de usuarios, roles y permisos',
     )
     .setVersion('1.0')
     .addBearerAuth()
@@ -28,7 +30,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: true,
+      forbidNonWhitelisted: false,
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,
@@ -37,10 +39,9 @@ async function bootstrap() {
   );
 
   await app.listen(port, () => {
-    Logger.log(
-      `Application is running on: http://localhost:${port}/${globalPrefix}`,
-    );
-    Logger.log(`Swagger is running on: http://localhost:${port}/api`);
+    Logger.log('Listening at http://localhost:' + port + '/' + globalPrefix);
   });
 }
-bootstrap();
+bootstrap().catch((error) => {
+  Logger.error('Error during application bootstrap', error);
+});

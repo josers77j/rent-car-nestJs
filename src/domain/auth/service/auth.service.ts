@@ -15,7 +15,13 @@ export class AuthService {
   async login({ email, password }: LoginDto) {
     const user = await this.userService.findOneByUserEmail(email);
 
-    const { password: passwordFromDb, email: emailFromDb, name, role } = user;
+    const {
+      password: passwordFromDb,
+      email: emailFromDb,
+      name,
+      role,
+      id,
+    } = user;
 
     const isPasswordValid = await bcrypt.compare(password, passwordFromDb);
 
@@ -25,13 +31,14 @@ export class AuthService {
       );
     }
 
-    const payload = { email: emailFromDb, name, role: role?.name };
+    const payload = { id, email: emailFromDb, name, role: role?.name };
 
     const token = await this.jwtService.signAsync(payload);
 
     return {
       token,
       user: {
+        id,
         email: emailFromDb,
         name,
         role: role?.name,

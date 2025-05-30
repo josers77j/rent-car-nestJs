@@ -5,7 +5,6 @@ import {
   CreateUserDto,
   passwordUserDto,
   UpdateBasicInformationDto,
-  updateEmailDto,
 } from '../dto/create-user.dto';
 import { GenericQueryFilterDto } from 'src/domain/Dto/generic-query-filter.dto';
 import { Prisma } from '@prisma/client';
@@ -60,23 +59,11 @@ export class UserRepository {
     });
   }
 
-  async updateEmail(userId: number, user: updateEmailDto) {
-    const { email } = user;
-    return await this.prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        email,
-      },
-    });
-  }
-
   async updateBasicInformation(
     userId: number,
     user: UpdateBasicInformationDto,
   ) {
-    const { name, roleId } = user;
+    const { name, roleId, email } = user;
     return await this.prisma.user.update({
       where: {
         id: userId,
@@ -84,18 +71,36 @@ export class UserRepository {
       data: {
         name,
         roleId,
+        email,
       },
     });
   }
 
-  findAll<T>(queryFilter: GenericQueryFilterDto<T>) {
+  findAll(queryFilter: GenericQueryFilterDto, name: string, userId: number) {
     const { perPage, page } = queryFilter;
+
     const where: Prisma.UserWhereInput = {};
+
+    if (name) {
+      where.name = {
+        contains: name,
+        mode: 'insensitive',
+      };
+    }
+
+    if (userId) {
+      where.id = {
+        equals: userId,
+      };
+    }
 
     return builderPagination({
       model: this.prisma.user,
       args: {
         where,
+        include: {
+          role: true,
+        },
       },
       options: {
         page,
