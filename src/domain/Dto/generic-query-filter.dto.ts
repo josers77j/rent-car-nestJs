@@ -8,7 +8,7 @@ export class FiltersDto {
   email?: string;
 }
 
-export class GenericQueryFilterDto {
+export class GenericQueryFilterDto<T> {
   @IsOptional()
   @IsISO8601()
   to: string;
@@ -24,4 +24,8 @@ export class GenericQueryFilterDto {
   @IsOptional()
   @IsNumber()
   page: number = 1;
+
+   @IsOptional()
+  filters?: Partial<T>;
+  
 }

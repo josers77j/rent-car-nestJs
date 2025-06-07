@@ -76,7 +76,7 @@ export class UserRepository {
     });
   }
 
-  findAll(queryFilter: GenericQueryFilterDto, name: string, userId: number) {
+  findAll<T>(queryFilter: GenericQueryFilterDto<T>, name: string, userId: number) {
     const { perPage, page } = queryFilter;
 
     const where: Prisma.UserWhereInput = {};
@@ -108,4 +108,13 @@ export class UserRepository {
       },
     });
   }
+  async findNameById(userId: number): Promise<string | null> {
+  const user = await this.prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true },
+  });
+
+  return user?.name || null;
+}
+
 }

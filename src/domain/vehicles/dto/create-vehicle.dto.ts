@@ -3,6 +3,7 @@ import {
     IsNotEmpty,
     IsString,
     IsNumber,
+    IsOptional
 } from "class-validator";
 
 export class CreateVehicleDto {
@@ -33,4 +34,14 @@ export class CreateVehicleDto {
     @IsNotEmpty()
     @IsNumber()
     dailyRate: number;
+
+      @IsOptional()
+  @IsNumber()
+  createdBy: number; 
+
+    @IsOptional()
+  @IsNumber()
+  modifiedBy: number;
+  
+
 }

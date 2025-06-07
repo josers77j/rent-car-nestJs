@@ -31,10 +31,10 @@ export class UsersController {
   }
 
   @Get('all')
-  findAll(
+  findAll<T>(
     @Query('name') name: string,
     @Query('userId') userId: number,
-    @Query() queryFilter: GenericQueryFilterDto,
+    @Query() queryFilter: GenericQueryFilterDto<T>,
   ) {
     return this.usersService.findAll(queryFilter, name, +userId);
   }
