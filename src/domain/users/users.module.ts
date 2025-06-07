@@ -8,7 +8,7 @@ import { AuthModule } from '../auth/auth.module';
 @Module({
   controllers: [UsersController],
   providers: [UsersService, PrismaService, UserRepository],
-  exports: [UsersService],
+  exports: [UsersService,UserRepository],
   imports: [forwardRef(() => AuthModule)],
 })
 export class UsersModule {}

@@ -20,6 +20,22 @@ import { GenericQueryFilterDto } from 'src/domain/Dto/generic-query-filter.dto';
 @Injectable()
 export class UsersService {
   constructor(private readonly userRepository: UserRepository) {}
+ 
+  
+  // Obtener el nombre del usuario autenticado
+  async getAuthenticatedUserName(userId: number): Promise<string> {
+    try {
+      const userName = await this.userRepository.findNameById(userId);
+      if (!userName) {
+        throw new UnauthorizedException('Usuario no autenticado o no encontrado');
+      }
+      return userName;
+    } catch (error) {
+      Logger.error(error);
+      throw new InternalServerErrorException('Error al obtener el nombre del usuario autenticado');
+    }
+  }
+
 
   async findOneByUserEmail(email: string) {
     try {
@@ -89,8 +105,8 @@ export class UsersService {
     }
   }
 
-  async findAll(
-    queryFilter: GenericQueryFilterDto,
+  async findAll<T>(
+    queryFilter: GenericQueryFilterDto<T>,
     name: string,
     userId: number,
   ) {
