@@ -52,7 +52,7 @@ export class UsersService {
     }
   }
 
-  async createUser(createUserDto: CreateUserDto) {
+  async createUser(createUserDto: CreateUserDto,authenticatedUserId: number) {
     try {
       let password = process.env.USER_SECRET_PASSWORD || 'rentcarpassword';
       const saltRounds = 12;
@@ -64,6 +64,7 @@ export class UsersService {
       const createProcess = await this.userRepository.createUser({
         ...createUserDto,
         password,
+         createdBy: authenticatedUserId, 
       });
       if (!createProcess)
         throw new UnprocessableEntityException(
@@ -105,57 +106,67 @@ export class UsersService {
     }
   }
 
-  async findAll<T>(
-    queryFilter: GenericQueryFilterDto<T>,
-    name: string,
-    userId: number,
-  ) {
-    try {
-      //return await this.userRepository.findAll(queryFilter, name);
-      const { data, meta } = await this.userRepository.findAll(
-        queryFilter,
-        name,
-        userId,
-      );
+async findAll<T>(
+  queryFilter: GenericQueryFilterDto<T>,
+  name: string,
+  userId: number,
+) {
+  const { data, meta } = await this.userRepository.findAll(queryFilter, name, userId);
 
-      const usersMapped = data.map((user) => {
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          roleId: user.roleId,
-          createdAt: user.createdAt,
-          role: user['role']?.name || null,
-        };
-      });
+ const usersMapped = data.map((user) => ({
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  roleId: user.roleId,
+  createdAt: user.createdAt,
+  role: user['role']?.name || null,
+  createdBy: user['createdByUser']?.name || null, // Usando el mismo enfoque que con "role"
+  modifiedBy: user['modifiedByUser']?.name || null,
+  deletedBy: user['deletedByUser']?.name || null,
+  deletedAt: user.deletedAt || null,
+}));
 
-      const payload = {
-        data: usersMapped,
-        meta: {
-          total: meta.total,
-          lastpage: meta.lastPage,
-          page: meta.currentPage,
-          prev: meta.prev,
-          next: meta.next,
-          perPage: queryFilter.perPage,
-        },
-      };
-      return payload;
-    } catch (error) {
-      Logger.error(error);
 
-      throw new InternalServerErrorException('Error al obtener los usuarios');
-    }
+  return {
+    data: usersMapped,
+    meta: {
+      total: meta.total,
+      lastpage: meta.lastPage,
+      page: meta.currentPage,
+      prev: meta.prev,
+      next: meta.next,
+      perPage: queryFilter.perPage,
+    },
+  };
+}
+
+async deleteUser(userId: number, authenticatedUserId: number) {
+  try {
+    const userDeleted = await this.userRepository.deleteUser(userId, authenticatedUserId);
+
+    if (!userDeleted)
+      throw new UnprocessableEntityException('No se pudo eliminar el usuario.');
+
+    return { message: 'Usuario eliminado exitosamente' };
+  } catch (error) {
+    Logger.error(error);
+    if (error instanceof UnprocessableEntityException) throw error;
+
+    throw new InternalServerErrorException('Error al eliminar el usuario.');
   }
+}
+
 
   async updateBasicInformation(
     userId: number,
     user: UpdateBasicInformationDto,
+     authenticatedUserId: number,
   ) {
     try {
       const userUpdated = await this.userRepository.updateBasicInformation(
         userId,
         user,
+        authenticatedUserId
       );
 
       if (!userUpdated)

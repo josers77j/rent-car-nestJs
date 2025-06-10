@@ -33,19 +33,21 @@ export class UserRepository {
     });
   }
 
-  async createUser(createUserDto: CreateUserDto) {
-    const { name, email, roleId, password } = createUserDto;
-    console.log('createUserDto', createUserDto);
-    return await this.prisma.user.create({
-      data: {
-        name,
-        email,
-        roleId,
-        password,
-        createdAt: new Date(),
-      },
-    });
-  }
+ async createUser(createUserDto: CreateUserDto) {
+  const { name, email, roleId, password, createdBy } = createUserDto; // Asegúrate de incluir "createdBy"
+  console.log('createUserDto', createUserDto);
+  return await this.prisma.user.create({
+    data: {
+      name,
+      email,
+      roleId,
+      password,
+      createdBy, // Asignamos el usuario autenticado como creador
+      createdAt: new Date(),
+    },
+  });
+}
+
 
   async updatePassword(passwordUserDto: passwordUserDto, userId: number) {
     const { password } = passwordUserDto;
@@ -60,8 +62,7 @@ export class UserRepository {
   }
 
   async updateBasicInformation(
-    userId: number,
-    user: UpdateBasicInformationDto,
+userId: number, user: UpdateBasicInformationDto, authenticatedUserId: number,
   ) {
     const { name, roleId, email } = user;
     return await this.prisma.user.update({
@@ -72,42 +73,58 @@ export class UserRepository {
         name,
         roleId,
         email,
+       modifiedBy: authenticatedUserId,
       },
     });
   }
 
-  findAll<T>(queryFilter: GenericQueryFilterDto<T>, name: string, userId: number) {
-    const { perPage, page } = queryFilter;
+ async findAll<T>(queryFilter: GenericQueryFilterDto<T>, name: string, userId: number) {
+  const { perPage, page } = queryFilter;
 
-    const where: Prisma.UserWhereInput = {};
+  const where: Prisma.UserWhereInput = {};
 
-    if (name) {
-      where.name = {
-        contains: name,
-        mode: 'insensitive',
-      };
-    }
-
-    if (userId) {
-      where.id = {
-        equals: userId,
-      };
-    }
-
-    return builderPagination({
-      model: this.prisma.user,
-      args: {
-        where,
-        include: {
-          role: true,
-        },
-      },
-      options: {
-        page,
-        perPage,
-      },
-    });
+  if (name) {
+    where.name = {
+      contains: name,
+      mode: 'insensitive',
+    };
   }
+
+  if (userId) {
+    where.id = {
+      equals: userId,
+    };
+  }
+
+  return builderPagination({
+    model: this.prisma.user,
+    args: {
+      where,
+      include: {
+        role: { select: { name: true } },
+        createdByUser: { select: { name: true } }, // Incluye el usuario creador
+        modifiedByUser: { select: { name: true } }, // Incluye el usuario que modificó
+        deletedByUser: { select: { name: true } }, // Incluye el usuario que eliminó
+      },
+    },
+    options: {
+      page,
+      perPage,
+    },
+  });
+}
+async deleteUser(userId: number, authenticatedUserId: number) {
+  return await this.prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      deletedBy: authenticatedUserId,
+      deletedAt: new Date(),
+    },
+  });
+}
+
   async findNameById(userId: number): Promise<string | null> {
   const user = await this.prisma.user.findUnique({
     where: { id: userId },
