@@ -6,6 +6,8 @@ import {
   Patch,
   Post,
   Query,
+  Delete,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../service/users.service';
@@ -17,7 +19,7 @@ import {
 import { AuthGuard } from 'src/domain/auth/guards/auth.guard';
 import { GenericQueryFilterDto } from 'src/domain/Dto/generic-query-filter.dto';
 
-@UseGuards(AuthGuard)
+//@UseGuards(AuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -39,16 +41,25 @@ export class UsersController {
     return this.usersService.findAll(queryFilter, name, +userId);
   }
 
-  @Post()
+@Post()
   createUser(@Body() user: CreateUserDto) {
-    return this.usersService.createUser(user);
+    const authenticatedUserId = 1; // ID del usuario autenticado, hardcodeado para pruebas
+    return this.usersService.createUser(user, authenticatedUserId);
+  }
+   @Patch(':id')
+  updateUser(
+    @Param('id') id: string,
+    @Body() user: UpdateBasicInformationDto,
+  ) {
+    const userId = parseInt(id, 10);
+    const authenticatedUserId = 1; // ID del usuario autenticado, hardcodeado para pruebas
+    return this.usersService.updateBasicInformation(userId, user, authenticatedUserId);
   }
 
-  @Patch(':id')
-  updateBasicInformation(
-    @Body() user: UpdateBasicInformationDto,
-    @Param('id') id: number,
-  ) {
-    return this.usersService.updateBasicInformation(id, user);
-  }
+  @Delete(':id')
+deleteUser(@Param('id') id: string) {
+  const userId = parseInt(id, 10);
+  const authenticatedUserId = 1; // ID del usuario autenticado, hardcodeado para pruebas
+  return this.usersService.deleteUser(userId, authenticatedUserId);
+}
 }

@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -24,6 +25,10 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsNumber()
   roleId: number;
+
+  @IsOptional()
+  @IsNumber()
+  createdBy?: number;
 }
 
 export class passwordUserDto extends PickType(CreateUserDto, ['password']) {

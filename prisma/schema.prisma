@@ -118,6 +118,26 @@ model User {
   createdPermissions   Permission[]  @relation("PermissionCreatedBy")
   modifiedPermissions  Permission[]  @relation("PermissionModifiedBy")
   deletedPermissions   Permission[]  @relation("PermissionDeletedBy")
+
+   // Relaciones con Company
+  createdCompanies   Company[]        @relation("CompanyCreatedBy")
+  modifiedCompanies  Company[]        @relation("CompanyModifiedBy")
+  deletedCompanies   Company[]        @relation("CompanyDeletedBy")
+
+  // Relaciones con Branch
+  createdBranches      Branch[]      @relation("BranchCreatedBy")
+  modifiedBranches     Branch[]      @relation("BranchModifiedBy")
+  deletedBranches      Branch[]      @relation("BranchDeletedBy")
+
+
+   // Relaciones con otros usuarios
+  createdByUser User? @relation("UserCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  modifiedByUser User? @relation("UserModifiedBy", fields: [modifiedBy], references: [id], onDelete: SetNull)
+  deletedByUser User? @relation("UserDeletedBy", fields: [deletedBy], references: [id], onDelete: SetNull)
+
+  createdUsers User[] @relation("UserCreatedBy")
+  modifiedUsers User[] @relation("UserModifiedBy")
+  deletedUsers User[] @relation("UserDeletedBy")
 }
 
 model Permission {
@@ -183,6 +203,9 @@ model Vehicle {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @default(now())
   deletedAt      DateTime?
+
+  companyId      Int?
+  company        Company?      @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   createdByUser  User?        @relation("VehicleCreatedBy", fields: [createdBy], references: [id])
   modifiedByUser User?        @relation("VehicleModifiedBy", fields: [modifiedBy], references: [id])
@@ -258,4 +281,53 @@ model Payment {
   createdByUser  User?        @relation("PaymentCreatedBy", fields: [createdBy], references: [id])
   modifiedByUser User?        @relation("PaymentModifiedBy", fields: [modifiedBy], references: [id])
   deletedByUser  User?        @relation("PaymentDeletedBy", fields: [deletedBy], references: [id])
+
+}
+model Company {
+  id             Int       @id @default(autoincrement())
+  name           String
+  registrationNo String    @unique
+  classification String
+  phone          String
+  address        String
+  email          String?
+  website        String?
+
+  createdBy      Int?
+  modifiedBy     Int?
+  deletedBy      Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+  deletedAt      DateTime?
+
+  // User relations
+  createdByUser  User? @relation("CompanyCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  modifiedByUser User? @relation("CompanyModifiedBy", fields: [modifiedBy], references: [id], onDelete: SetNull)
+  deletedByUser  User? @relation("CompanyDeletedBy", fields: [deletedBy], references: [id], onDelete: SetNull)
+
+  // Branches and vehicles relations
+  branches       Branch[] 
+  Vehicles       Vehicle[]
+}
+
+model Branch {
+  id             Int       @id @default(autoincrement())
+  state          String
+  city           String
+  district       String
+
+  companyId      Int
+  company        Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdBy      Int?
+  modifiedBy     Int?
+  deletedBy      Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+  deletedAt      DateTime?
+
+  // User relations
+  createdByUser  User? @relation("BranchCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  modifiedByUser User? @relation("BranchModifiedBy", fields: [modifiedBy], references: [id], onDelete: SetNull)
+  deletedByUser  User? @relation("BranchDeletedBy", fields: [deletedBy], references: [id], onDelete: SetNull)
 }
