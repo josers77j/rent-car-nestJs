@@ -26,9 +26,6 @@ export class CreateUserDto {
   @IsNumber()
   roleId: number;
 
-  @IsOptional()
-  @IsNumber()
-  createdBy?: number;
 }
 
 export class passwordUserDto extends PickType(CreateUserDto, ['password']) {

@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+// eslint-disable-next-line prettier/prettier
 import {
   Body,
   Controller,
@@ -7,7 +9,6 @@ import {
   Post,
   Query,
   Delete,
-  Request,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../service/users.service';
@@ -18,8 +19,10 @@ import {
 } from '../dto/create-user.dto';
 import { AuthGuard } from 'src/domain/auth/guards/auth.guard';
 import { GenericQueryFilterDto } from 'src/domain/Dto/generic-query-filter.dto';
+import { GetUser } from 'src/decorators/user-token.decorators';
+import { JwtPayload } from 'src/interfaces/jwt-strategy.interface';
 
-//@UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -41,25 +44,36 @@ export class UsersController {
     return this.usersService.findAll(queryFilter, name, +userId);
   }
 
-@Post()
-  createUser(@Body() user: CreateUserDto) {
-    const authenticatedUserId = 1; // ID del usuario autenticado, hardcodeado para pruebas
-    return this.usersService.createUser(user, authenticatedUserId);
-  }
-   @Patch(':id')
-  updateUser(
-    @Param('id') id: string,
-    @Body() user: UpdateBasicInformationDto,
+  @Post()
+  createUser(
+    @Body() userBody: CreateUserDto, 
+    @GetUser() userInformation: JwtPayload
   ) {
-    const userId = parseInt(id, 10);
-    const authenticatedUserId = 1; // ID del usuario autenticado, hardcodeado para pruebas
-    return this.usersService.updateBasicInformation(userId, user, authenticatedUserId);
+    const { name } = userInformation;
+
+    return this.usersService.createUser(userBody, name);
+  }
+
+  @Patch(':id')
+  updateUser(
+    @Param('id') id: string, 
+    @Body() userBody: UpdateBasicInformationDto, 
+    @GetUser() userInformation: JwtPayload) {
+    
+       console.log({info: userInformation});
+      const { name } = userInformation;
+      
+    return this.usersService.updateBasicInformation(
+      +id,
+      userBody,
+      name,
+    );
+    
   }
 
   @Delete(':id')
-deleteUser(@Param('id') id: string) {
-  const userId = parseInt(id, 10);
-  const authenticatedUserId = 1; // ID del usuario autenticado, hardcodeado para pruebas
-  return this.usersService.deleteUser(userId, authenticatedUserId);
-}
+  deleteUser(@Param('id') id: string) {
+    const authenticatedUserId = 'Yonatan'; // ID del usuario autenticado, hardcodeado para pruebas
+    return this.usersService.deleteUser(+id, authenticatedUserId);
+  }
 }
