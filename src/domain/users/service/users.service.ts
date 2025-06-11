@@ -20,22 +20,24 @@ import { GenericQueryFilterDto } from 'src/domain/Dto/generic-query-filter.dto';
 @Injectable()
 export class UsersService {
   constructor(private readonly userRepository: UserRepository) {}
- 
-  
+
   // Obtener el nombre del usuario autenticado
   async getAuthenticatedUserName(userId: number): Promise<string> {
     try {
       const userName = await this.userRepository.findNameById(userId);
       if (!userName) {
-        throw new UnauthorizedException('Usuario no autenticado o no encontrado');
+        throw new UnauthorizedException(
+          'Usuario no autenticado o no encontrado',
+        );
       }
       return userName;
     } catch (error) {
       Logger.error(error);
-      throw new InternalServerErrorException('Error al obtener el nombre del usuario autenticado');
+      throw new InternalServerErrorException(
+        'Error al obtener el nombre del usuario autenticado',
+      );
     }
   }
-
 
   async findOneByUserEmail(email: string) {
     try {
@@ -52,7 +54,7 @@ export class UsersService {
     }
   }
 
-  async createUser(createUserDto: CreateUserDto,authenticatedUserId: number) {
+  async createUser(createUserDto: CreateUserDto, username: string) {
     try {
       let password = process.env.USER_SECRET_PASSWORD || 'rentcarpassword';
       const saltRounds = 12;
@@ -64,8 +66,7 @@ export class UsersService {
       const createProcess = await this.userRepository.createUser({
         ...createUserDto,
         password,
-         createdBy: authenticatedUserId, 
-      });
+      }, username);
       if (!createProcess)
         throw new UnprocessableEntityException(
           'Ocurrio un error al crear el usuario',
@@ -106,67 +107,77 @@ export class UsersService {
     }
   }
 
-async findAll<T>(
-  queryFilter: GenericQueryFilterDto<T>,
-  name: string,
-  userId: number,
-) {
-  const { data, meta } = await this.userRepository.findAll(queryFilter, name, userId);
+  async findAll<T>(
+    queryFilter: GenericQueryFilterDto<T>,
+    name: string,
+    userId: number,
+  ) {
+    const { data, meta } = await this.userRepository.findAll(
+      queryFilter,
+      name,
+      userId,
+    );
 
- const usersMapped = data.map((user) => ({
-  id: user.id,
-  name: user.name,
-  email: user.email,
-  roleId: user.roleId,
-  createdAt: user.createdAt,
-  role: user['role']?.name || null,
-  createdBy: user['createdByUser']?.name || null, // Usando el mismo enfoque que con "role"
-  modifiedBy: user['modifiedByUser']?.name || null,
-  deletedBy: user['deletedByUser']?.name || null,
-  deletedAt: user.deletedAt || null,
-}));
+    const usersMapped = data.map((user) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      roleId: user.roleId,
+      createdAt: user.createdAt,
+      createdby: user.createdBy,
+      modifyBy: user.modifiedBy,
+      updatedAt: user.updatedAt,
+      role: user['role']?.name ?? null,
+      createdBy: user.createdBy ?? null, 
+      modifiedBy: user.modifiedBy ?? null,
+      deletedBy: user.deletedBy,
+      deletedAt: user.deletedAt ?? null,
+    }));
 
-
-  return {
-    data: usersMapped,
-    meta: {
-      total: meta.total,
-      lastpage: meta.lastPage,
-      page: meta.currentPage,
-      prev: meta.prev,
-      next: meta.next,
-      perPage: queryFilter.perPage,
-    },
-  };
-}
-
-async deleteUser(userId: number, authenticatedUserId: number) {
-  try {
-    const userDeleted = await this.userRepository.deleteUser(userId, authenticatedUserId);
-
-    if (!userDeleted)
-      throw new UnprocessableEntityException('No se pudo eliminar el usuario.');
-
-    return { message: 'Usuario eliminado exitosamente' };
-  } catch (error) {
-    Logger.error(error);
-    if (error instanceof UnprocessableEntityException) throw error;
-
-    throw new InternalServerErrorException('Error al eliminar el usuario.');
+    return {
+      data: usersMapped,
+      meta: {
+        total: meta.total,
+        lastpage: meta.lastPage,
+        page: meta.currentPage,
+        prev: meta.prev,
+        next: meta.next,
+        perPage: queryFilter.perPage,
+      },
+    };
   }
-}
 
+  async deleteUser(userId: number, authenticatedUserId: string) {
+    try {
+      const userDeleted = await this.userRepository.deleteUser(
+        userId,
+        authenticatedUserId,
+      );
+
+      if (!userDeleted)
+        throw new UnprocessableEntityException(
+          'No se pudo eliminar el usuario.',
+        );
+
+      return { message: 'Usuario eliminado exitosamente' };
+    } catch (error) {
+      Logger.error(error);
+      if (error instanceof UnprocessableEntityException) throw error;
+
+      throw new InternalServerErrorException('Error al eliminar el usuario.');
+    }
+  }
 
   async updateBasicInformation(
-    userId: number,
-    user: UpdateBasicInformationDto,
-     authenticatedUserId: number,
+    id: number,
+    userBody: UpdateBasicInformationDto,
+    username: string,
   ) {
     try {
       const userUpdated = await this.userRepository.updateBasicInformation(
-        userId,
-        user,
-        authenticatedUserId
+        id,
+        userBody,
+        username,
       );
 
       if (!userUpdated)
