@@ -8,4 +8,10 @@ export class CreateRoleDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+    @IsOptional()
+  @IsString()
+  roleId?: number;
+
 }
+

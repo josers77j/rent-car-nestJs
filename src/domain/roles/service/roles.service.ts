@@ -2,50 +2,65 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateRoleDto } from '../dto/create-role.dto';
 import { UpdateRoleDto } from '../dto/update-role.dto';
 import { RoleRepository } from '../repository/role.repository';
+import bcrypt from 'bcryptjs/umd/types';
+import { UserRepository } from 'src/domain/users/repository/user.repository';
+import { UpdateBasicInformationDto } from 'src/domain/users/dto/create-user.dto';
 
 @Injectable()
 export class RolesService {
-  constructor(private readonly roleRepository: RoleRepository) {}
-
-  // Método para transformar un rol
-  private transformRole(role: any) {
-    return {
-      id: role.id,
-      name: role.name,
-      description: role.description,
-      createdBy: role.createdByUser?.name || null,
-      modifiedBy: role.modifiedByUser?.name || null,
-      deletedBy: role.deletedByUser?.name || null,
-      createdAt: role.createdAt,
-      updatedAt: role.updatedAt,
-      deletedAt: role.deletedAt,
-    };
+  updateBasicInformation(arg0: number, userBody: UpdateBasicInformationDto, name: any) {
+    throw new Error('Method not implemented.');
   }
+  constructor(private readonly roleRepository: RoleRepository,
+    private readonly userRepository: UserRepository, 
+  ) {}
 
-  async create(createRoleDto: CreateRoleDto, authenticatedUserId: number) {
-    const role = await this.roleRepository.create({
-      ...createRoleDto,
-      createdBy: authenticatedUserId,
-    });
-    return this.transformRole(role);
-  }
+private transformRole(role: any) {
+  return {
+    id: role.id,
+    name: role.name,
+    description: role.description,
+    createdBy: role.createdBy || null,
+    modifiedBy: role.modifiedBy || null,
+    deletedBy: role.deletedBy || null,
+    createdAt: role.createdAt,
+    updatedAt: role.updatedAt,
+    deletedAt: role.deletedAt,
+  };
+}
 
-  async update(roleId: number, updateRoleDto: UpdateRoleDto, authenticatedUserId: number) {
+ async createRole(createRoleDto: CreateRoleDto, username: string) {
     try {
-      const role = await this.roleRepository.update(roleId, {
-        ...updateRoleDto,
-        modifiedBy: authenticatedUserId,
-      });
-      return this.transformRole(role); // Transformación aquí
-    } catch (error) {
-      Logger.error(error);
-      throw new InternalServerErrorException('Error al actualizar el rol');
+      const createProcess = await this.roleRepository.createRole(createRoleDto, username);
+      if (!createProcess) {
+        throw new UnprocessableEntityException('Ocurrió un error al crear el rol');
+      }
+      return createProcess;
+    } catch (err) {
+      Logger.error(err);
+      throw new InternalServerErrorException('Error al crear el rol');
     }
+ 
   }
+   
+async update(roleId: number, updateRoleDto: UpdateRoleDto, username: string) {
+  try {
+    
+    // Actualizar el rol con el nombre del usuario
+    const role = await this.roleRepository.update(roleId, updateRoleDto, username);
+
+    return this.transformRole(role);
+  } catch (error) {
+    Logger.error(error);
+    throw new InternalServerErrorException('Error al actualizar el rol');
+  }
+}
 
   async softDelete(roleId: number, authenticatedUserId: number) {
     try {
