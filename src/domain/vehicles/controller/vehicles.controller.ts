@@ -16,14 +16,17 @@ import { Vehicle } from '@prisma/client';
 import { UpdateVehicleDto } from '../dto/update-vehicle.dto';
 import { GenericQueryFilterDto } from 'src/domain/Dto/generic-query-filter.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from 'src/decorators/user-token.decorators';
+import { JwtPayload } from 'src/interfaces/jwt-strategy.interface';
 
 @Controller('vehicles')
 export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}
 
   @Post()
-  create(@Body() createVehicleDto: CreateVehicleDto) {
-    return this.vehiclesService.createVehicle(createVehicleDto);
+  create(@Body() createVehicleDto: CreateVehicleDto,  @GetUser() userInformation: JwtPayload) {
+    const {name} = userInformation;
+    return this.vehiclesService.createVehicle(createVehicleDto, name);
   }
 
   @Get()
@@ -32,14 +35,15 @@ export class VehiclesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updateVehicleDto: UpdateVehicleDto) {
-    return this.vehiclesService.updateVehicle(updateVehicleDto, +id);
+  update(@Param('id') id: number, @Body() updateVehicleDto: UpdateVehicleDto, @GetUser() userInformation: JwtPayload) {
+    const {name} = userInformation;
+    return this.vehiclesService.updateVehicle(updateVehicleDto, +id, name);
   }
 
  @Delete(':id')
-async remove(@Param('id') id: string) {
-  const deletedBy = 1; // Cambia esto por el ID del usuario predeterminado o el origen donde obtienes el usuario.
-  return this.vehiclesService.removeVehicle(+id, deletedBy);
+async remove(@Param('id') id: string, @GetUser() userInformation: JwtPayload) {
+  const {name} = userInformation;
+  return this.vehiclesService.removeVehicle(+id, name);
 }
 
 

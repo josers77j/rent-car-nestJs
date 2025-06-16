@@ -37,11 +37,11 @@ export class CreateVehicleDto {
 
       @IsOptional()
   @IsNumber()
-  createdBy: number; 
+  createdBy: string; 
 
     @IsOptional()
   @IsNumber()
-  modifiedBy: number;
+  modifiedBy: string;
   
 
 }

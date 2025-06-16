@@ -20,9 +20,9 @@ export class CreateClientDto {
 
   @IsOptional()
   @IsInt()
-  createdBy?: number;
+  createdBy?: string;
 
   @IsOptional()
   @IsInt()
-  modifiedBy?: number; 
+  modifiedBy?: string; 
 }

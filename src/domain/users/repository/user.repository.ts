@@ -77,7 +77,7 @@ export class UserRepository {
         roleId,
         email,
         modifiedBy: username,
-        createdBy: username,
+       createdBy: username,
         updatedAt: new Date(),
         createdAt: new Date()
       },
