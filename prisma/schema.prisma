@@ -110,11 +110,6 @@ model User {
   modifiedCompanies  Company[]        @relation("CompanyModifiedBy")
   deletedCompanies   Company[]        @relation("CompanyDeletedBy")
 
-  // Relaciones con Branch
-  createdBranches      Branch[]      @relation("BranchCreatedBy")
-  modifiedBranches     Branch[]      @relation("BranchModifiedBy")
-  deletedBranches      Branch[]      @relation("BranchDeletedBy")
-
 }
 
 model Permission {
@@ -290,15 +285,12 @@ model Branch {
   companyId      Int
   company        Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  createdBy       Int?
-  modifiedBy     Int?
-  deletedBy      Int?
+  createdBy       String?
+  modifiedBy     String?
+  deletedBy      String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @default(now())
   deletedAt      DateTime?
 
-  // User relations
-  createdByUser  User? @relation("BranchCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
-  modifiedByUser User? @relation("BranchModifiedBy", fields: [modifiedBy], references: [id], onDelete: SetNull)
-  deletedByUser  User? @relation("BranchDeletedBy", fields: [deletedBy], references: [id], onDelete: SetNull)
+ 
 }

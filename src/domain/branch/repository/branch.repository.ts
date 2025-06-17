@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from "prisma/prisma.service";
 import { CreateBranchDto } from '../dto/create-branch.dto';
 import { UpdateBranchDto } from '../dto/update-branch.dto';
+import { GenericQueryFilterDto } from 'src/domain/Dto/generic-query-filter.dto';
+import { Prisma } from '@prisma/client';
+import { builderPagination } from 'src/helpers/pagination-builder.helpers';
 
 @Injectable()
 export class BranchRepository {
@@ -10,35 +13,62 @@ export class BranchRepository {
   async create(createBranchDto: CreateBranchDto) {
     return await this.prisma.branch.create({
       data: createBranchDto,
-      include: {
-        company: true,
-        createdByUser: { select: { name: true } },
-        modifiedByUser: { select: { name: true } },
-        deletedByUser: { select: { name: true } },
-      },
+      
     });
   }
 
-  async findAll() {
-    return await this.prisma.branch.findMany({
-      include: {
-        company: true,
-        createdByUser: { select: { name: true } },
-        modifiedByUser: { select: { name: true } },
-        deletedByUser: { select: { name: true } },
-      },
-    });
+async findAll<T>(queryFilter: GenericQueryFilterDto<T>, state?: string, city?: string) {
+  const { perPage = 10, page = 1 } = queryFilter;
+
+  // Construir el filtro dinámico para Prisma
+  const where: Prisma.BranchWhereInput = {};
+  
+  if (state) {
+    where.state = {
+      contains: state,
+      mode: 'insensitive',
+    };
   }
+  
+  if (city) {
+    where.city = {
+      contains: city,
+      mode: 'insensitive',
+    };
+  }
+
+  // Llamar al constructor de paginación
+  return builderPagination({
+    model: this.prisma.branch,
+    args: {
+      where,
+      select: {
+        id: true,
+        state: true,
+        city: true,
+        district: true,
+        company: {
+          select: {
+            name: true, // Solo el nombre de la compañía
+          },
+        },
+        createdBy: true,
+        modifiedBy: true,
+        deletedBy: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+      },
+    },
+    options: { page, perPage },
+  });
+}
+
 
   async findOne(id: number) {
     return await this.prisma.branch.findUnique({
       where: { id },
-      include: {
-        company: true,
-        createdByUser: { select: { name: true } },
-        modifiedByUser: { select: { name: true } },
-        deletedByUser: { select: { name: true } },
-      },
+     
     });
   }
 
@@ -50,12 +80,7 @@ export class BranchRepository {
       modifiedBy: updateBranchDto.modifiedBy, // Asegúrate de incluir esto
       updatedAt: new Date(), // Actualiza la fecha de modificación
     },
-    include: {
-      company: true,
-      createdByUser: { select: { name: true } },
-      modifiedByUser: { select: { name: true } },
-      deletedByUser: { select: { name: true } },
-    },
+    
   });
 }
 
@@ -65,14 +90,9 @@ async delete(id: number, deletedBy: number) {
     where: { id },
     data: {
       deletedAt: new Date(),
-      deletedBy, // Asegúrate de que este valor no sea undefined
+// Asegúrate de que este valor no sea undefined
     },
-    include: {
-      company: true,
-      createdByUser: { select: { name: true } },
-      modifiedByUser: { select: { name: true } },
-      deletedByUser: { select: { name: true } },
-    },
+    
   });
 }
 
