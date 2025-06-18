@@ -19,13 +19,13 @@ export class CreateBranchDto {
 
   @IsInt()
   @IsOptional()
-  createdBy?: number;
+  createdBy?: string;
 
     @IsInt()
   @IsOptional()
-  modifiedBy?: number;
+  modifiedBy?: string;
 
     @IsInt()
   @IsOptional()
-  deletedBy?: number;
+  deletedBy?: string;
 }

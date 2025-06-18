@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BranchRepository } from '../repository/branch.repository';
 import { CreateBranchDto } from '../dto/create-branch.dto';
 import { UpdateBranchDto } from '../dto/update-branch.dto';
+import { GenericQueryFilterDto } from 'src/domain/Dto/generic-query-filter.dto';
 
 @Injectable()
 export class BranchService {
@@ -12,10 +13,10 @@ export class BranchService {
     return await this.branchRepository.create(createBranchDto);
   }
 
-  // Obtener todas las sucursales con datos relacionados
-  async findAll() {
-    return await this.branchRepository.findAll();
+  async findAll<T>(queryFilter: GenericQueryFilterDto<T>, state?: string, city?: string) {
+    return await this.branchRepository.findAll(queryFilter, state, city);
   }
+
 
   // Obtener una sucursal por ID con datos relacionados
   async findOne(id: number) {
