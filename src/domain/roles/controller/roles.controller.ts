@@ -19,7 +19,7 @@ import { GetUser } from 'src/decorators/user-token.decorators';
 import { UpdateBasicInformationDto } from 'src/domain/users/dto/create-user.dto';
 import { JwtPayload } from 'src/interfaces/jwt-strategy.interface';
 
-@UseGuards(AuthGuard)
+//@UseGuards(AuthGuard)
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
