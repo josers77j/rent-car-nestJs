@@ -10,6 +10,7 @@ import { Vehicle } from '@prisma/client';
 import { builderPagination } from 'src/helpers/pagination-builder.helpers';
 import { UpdateVehicleDto } from "../dto/update-vehicle.dto";
 import { GenericQueryFilterDto } from "src/domain/Dto/generic-query-filter.dto";
+import { query } from "winston";
 
 @Injectable()
 export class VehicleRepository {
@@ -52,7 +53,7 @@ export class VehicleRepository {
 }
 
 
-async removeVehicle(vehicleId: number, deletedBy: number) {
+async removeVehicle(vehicleId: number, deletedBy: string) {
   return await this.prisma.vehicle.update({
     where: {
       id: vehicleId,
@@ -66,21 +67,23 @@ async removeVehicle(vehicleId: number, deletedBy: number) {
 }
 
 
-async findAll(queryFilter: GenericQueryFilterDto<Vehicle>): Promise<any> {
-  const vehicles = await this.prisma.vehicle.findMany({
-    where: {
-      ...queryFilter.filters,
-      // Si quieres incluir todos los registros (eliminados o no), elimina este filtro.
-      // El filtro puede depender de un parámetro opcional en `queryFilter` si deseas más control.
-    },
-    include: {
-      createdByUser: { select: { name: true } },
-      modifiedByUser: { select: { name: true } },
-      deletedByUser: { select: { name: true } },
-    },
-  });
+async findAll<T>(queryFilter: GenericQueryFilterDto<T>): Promise<any> {
+  const {page, perPage} = queryFilter;
+    const where: Prisma.VehicleWhereInput = {};
 
-  return vehicles;
+    return builderPagination({
+      model: this.prisma.vehicle,
+      args: {
+        where,
+        include: {
+          company: { select: { name: true } },
+        },
+      },
+      options: {
+        page,
+        perPage,
+      },
+    });
 }
 
 }

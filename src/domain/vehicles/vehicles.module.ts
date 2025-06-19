@@ -5,6 +5,8 @@ import { UsersModule } from '../users/users.module';
 import { PrismaService } from 'prisma/prisma.service';
 import { VehicleRepository } from './repository/vehicles.repository';
 
+import { AuthModule } from '../auth/auth.module';
+
 @Module({
   imports: [UsersModule],
   controllers: [VehiclesController],

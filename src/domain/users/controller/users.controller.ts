@@ -22,7 +22,7 @@ import { GenericQueryFilterDto } from 'src/domain/Dto/generic-query-filter.dto';
 import { GetUser } from 'src/decorators/user-token.decorators';
 import { JwtPayload } from 'src/interfaces/jwt-strategy.interface';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard)   //
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

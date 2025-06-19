@@ -13,6 +13,8 @@ import { MaintenanceModule } from './domain/maintenance/maintenance.module';
 import { RentalModule } from './domain/rental/rental.module';
 import { PermissionModule } from './domain/permission/permission.module';
 import { PaymentModule } from './domain/payment/payment.module';
+import { BranchModule } from './domain/branch/branch.module';
+import { ClaudinaryModule } from './domain/claudinary/claudinary.module';
 
 @Module({
   imports: [
@@ -22,8 +24,11 @@ import { PaymentModule } from './domain/payment/payment.module';
     RolesModule,
     ClientsModule,
     VehiclesModule,
-     MaintenanceModule, // Agregado
-    RentalModule, PermissionModule, PaymentModule, // Agregado
+    MaintenanceModule, // Agregado
+    RentalModule,
+    PermissionModule,
+    PaymentModule, // Agregado
+    BranchModule, ClaudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

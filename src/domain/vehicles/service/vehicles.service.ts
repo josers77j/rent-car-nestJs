@@ -10,6 +10,7 @@ import { UsersService } from '../../users/service/users.service';
 import { CreateVehicleDto } from '../dto/create-vehicle.dto';
 import { GenericQueryFilterDto } from 'src/domain/Dto/generic-query-filter.dto';
 import { UpdateVehicleDto } from '../dto/update-vehicle.dto';
+import { create } from 'domain';
 
 @Injectable()
 export class VehiclesService {
@@ -32,17 +33,18 @@ export class VehiclesService {
     }
   }*/
 
-async createVehicle(createVehicleDto: CreateVehicleDto) {
-  const userName = await this.usersService.getAuthenticatedUserName(createVehicleDto.createdBy);
-  if (!userName) {
-    throw new Error('Usuario no encontrado');
-  }
+async createVehicle(createVehicleDto: CreateVehicleDto, name: string) {
+
+  createVehicleDto.createdBy = name;
 
   return this.vehicleRepository.createVehicle(createVehicleDto);
 }
 
-  async updateVehicle(updateVehicleDto: UpdateVehicleDto, id: number) {
+  async updateVehicle(updateVehicleDto: UpdateVehicleDto, id: number, name: string) {
     try {
+
+      updateVehicleDto.modifiedBy = name;
+
       const updateProcess = await this.vehicleRepository.updateVehicle(
         id,
         updateVehicleDto
@@ -63,7 +65,7 @@ async createVehicle(createVehicleDto: CreateVehicleDto) {
     }
   }
 
-  async removeVehicle(id: number, deletedBy: number) {
+  async removeVehicle(id: number, deletedBy: string) {
   try {
     const removeProcess = await this.vehicleRepository.removeVehicle(id, deletedBy);
     if (!removeProcess) {
@@ -80,27 +82,9 @@ async createVehicle(createVehicleDto: CreateVehicleDto) {
 
 
  async findAll(queryFilter: GenericQueryFilterDto<Vehicle>): Promise<any> {
-  const vehicles = await this.vehicleRepository.findAll(queryFilter);
+  return await this.vehicleRepository.findAll(queryFilter);
 
-  return vehicles.map((vehicle) => ({
-    id: vehicle.id,
-    brand: vehicle.brand,
-    model: vehicle.model,
-    year: vehicle.year,
-    plateNumber: vehicle.plateNumber,
-    type: vehicle.type,
-    status: vehicle.status,
-    dailyRate: vehicle.dailyRate,
-    createdBy: vehicle.createdByUser?.name || null,
-    modifiedBy: vehicle.modifiedByUser?.name || null,
-    deletedBy: vehicle.deletedByUser?.name || null,
-    createdAt: vehicle.createdAt,
-    updatedAt: vehicle.updatedAt,
-    deletedAt: vehicle.deletedAt,
-    createdByUser: vehicle.createdByUser,
-    modifiedByUser: vehicle.modifiedByUser,
-    deletedByUser: vehicle.deletedByUser,
-  }));
+  
 }
 
 

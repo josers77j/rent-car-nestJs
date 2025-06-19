@@ -60,18 +60,15 @@ model Role {
   id          Int       @id @default(autoincrement())
   name        String
   description String?
-  createdBy   Int?
-  modifiedBy  Int?
-  deletedBy   Int?
+  createdBy   String?
+  modifiedBy  String?
+  deletedBy   String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now())
   deletedAt   DateTime?
 
   users           User[]
   permissions     RolePermission[]
-  createdByUser   User? @relation("RoleCreatedBy", fields: [createdBy], references: [id])
-  modifiedByUser  User? @relation("RoleModifiedBy", fields: [modifiedBy], references: [id])
-  deletedByUser   User? @relation("RoleDeletedBy", fields: [deletedBy], references: [id])
 }
 
 model User {
@@ -91,14 +88,6 @@ model User {
   deletedAt   DateTime?
 
   // Relaciones con otros modelos
-  createdCustomers     Customer[]    @relation("CustomerCreatedBy")
-  modifiedCustomers    Customer[]    @relation("CustomerModifiedBy")
-  deletedCustomers     Customer[]    @relation("CustomerDeletedBy")
-
-  createdVehicles      Vehicle[]     @relation("VehicleCreatedBy")
-  modifiedVehicles     Vehicle[]     @relation("VehicleModifiedBy")
-  deletedVehicles      Vehicle[]     @relation("VehicleDeletedBy")
-
   createdRentals       Rental[]      @relation("RentalCreatedBy")
   modifiedRentals      Rental[]      @relation("RentalModifiedBy")
   deletedRentals       Rental[]      @relation("RentalDeletedBy")
@@ -111,10 +100,6 @@ model User {
   modifiedMaintenance  Maintenance[] @relation("MaintenanceModifiedBy")
   deletedMaintenance   Maintenance[] @relation("MaintenanceDeletedBy")
 
-  createdRoles     Role[]            @relation("RoleCreatedBy")
-  modifiedRoles    Role[]            @relation("RoleModifiedBy")
-  deletedRoles     Role[]            @relation("RoleDeletedBy")
-
   createdPermissions   Permission[]  @relation("PermissionCreatedBy")
   modifiedPermissions  Permission[]  @relation("PermissionModifiedBy")
   deletedPermissions   Permission[]  @relation("PermissionDeletedBy")
@@ -123,11 +108,6 @@ model User {
   createdCompanies   Company[]        @relation("CompanyCreatedBy")
   modifiedCompanies  Company[]        @relation("CompanyModifiedBy")
   deletedCompanies   Company[]        @relation("CompanyDeletedBy")
-
-  // Relaciones con Branch
-  createdBranches      Branch[]      @relation("BranchCreatedBy")
-  modifiedBranches     Branch[]      @relation("BranchModifiedBy")
-  deletedBranches      Branch[]      @relation("BranchDeletedBy")
 
 }
 
@@ -165,16 +145,12 @@ model Customer {
   address            String?
   identification     String
   identificationType IdentificationType
-  createdBy          Int?
-  modifiedBy         Int?
-  deletedBy          Int?
+  createdBy          String?
+  modifiedBy         String?
+  deletedBy          String?
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @default(now())
   deletedAt          DateTime?
-
-  createdByUser      User?             @relation("CustomerCreatedBy", fields: [createdBy], references: [id])
-  modifiedByUser     User?             @relation("CustomerModifiedBy", fields: [modifiedBy], references: [id])
-  deletedByUser      User?             @relation("CustomerDeletedBy", fields: [deletedBy], references: [id])
 
   rentals            Rental[]
 }
@@ -188,19 +164,15 @@ model Vehicle {
   type           VehicleType
   status         VehicleStatus
   dailyRate      Float
-  createdBy      Int?
-  modifiedBy     Int?
-  deletedBy      Int?
+  createdBy      String?
+  modifiedBy     String?
+  deletedBy      String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @default(now())
   deletedAt      DateTime?
 
   companyId      Int?
   company        Company?      @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  createdByUser  User?        @relation("VehicleCreatedBy", fields: [createdBy], references: [id])
-  modifiedByUser User?        @relation("VehicleModifiedBy", fields: [modifiedBy], references: [id])
-  deletedByUser  User?        @relation("VehicleDeletedBy", fields: [deletedBy], references: [id])
 
   rentals        Rental[]
   maintenance    Maintenance[]
@@ -310,15 +282,10 @@ model Branch {
   companyId      Int
   company        Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  createdBy      Int?
-  modifiedBy     Int?
-  deletedBy      Int?
+  createdBy      String?
+  modifiedBy     String?
+  deletedBy      String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @default(now())
   deletedAt      DateTime?
-
-  // User relations
-  createdByUser  User? @relation("BranchCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
-  modifiedByUser User? @relation("BranchModifiedBy", fields: [modifiedBy], references: [id], onDelete: SetNull)
-  deletedByUser  User? @relation("BranchDeletedBy", fields: [deletedBy], references: [id], onDelete: SetNull)
 }
